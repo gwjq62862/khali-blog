@@ -3,6 +3,8 @@ import "./globals.css";
 
 import { ThemeModeScript } from "flowbite-react";
 import Header from "./Components/Header";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 
 
 const geistSans = localFont({
@@ -28,10 +30,14 @@ export default function RootLayout({ children }) {
         <ThemeModeScript />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased border-gray-900 bg-gray-900 text-white `}
+
       >
-       <Header/>
-        {children}
+        <ClerkProvider   appearance={{ theme: dark }}>
+          <Header />
+          {children}
+        </ClerkProvider>
+
       </body>
     </html>
   );

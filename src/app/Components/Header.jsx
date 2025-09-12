@@ -1,235 +1,186 @@
 "use client";
-
 import React, { useState } from "react";
+import { Search, Menu, X } from "lucide-react";
+import {
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { dark } from "@clerk/themes";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobile nav menu
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // Mobile search
-  const pathname = usePathname();
-
-  const isActive = (href) => pathname === href;
-
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-  const toggleSearch = () => setIsSearchOpen((prev) => !prev);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const { isLoaded, isSignedIn } = useUser();
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-       
-        <div className="flex items-center justify-between py-4">
-          
-          <Link href="/" className="flex items-center space-x-3">
-            
-            <span className="text-2xl font-semibold dark:text-white">
-              KhaliBlog
-            </span>
-          </Link>
+    <header className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
+      <div className="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Logo */}
+        <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+          <span className="text-blue-600">Khali</span>Blog
+        </Link>
 
-          {/* Desktop Search Bar (center) */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                  />
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Search..."
-                className="block w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-gray-50 
-                  text-gray-900 focus:ring-blue-500 focus:border-blue-500
-                  dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 
-                  dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Desktop Nav + Sign In */}
-          <div className="hidden md:flex items-center space-x-6">
-            {[
-              { name: "Home", path: "/" },
-              { name: "About", path: "/about" },
-              { name: "Services", path: "/services" },
-            ].map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`text-base font-medium transition-colors duration-300 ${
-                  isActive(item.path)
-                    ? "text-blue-700 dark:text-blue-400"
-                    : "text-gray-800 hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            <button
-              type="button"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 
-                focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 
-                dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Sign In
-            </button>
-          </div>
-
-          {/* Mobile Icons */}
-          <div className="flex md:hidden items-center space-x-3">
-            {/* Mobile Search Icon */}
-            <button
-              onClick={toggleSearch}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 focus:outline-none"
-              aria-label="Toggle Search"
-            >
-              <svg
-                className="w-5 h-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                />
-              </svg>
-            </button>
-
-            {/* Hamburger Menu Icon */}
-            <button
-              onClick={toggleMenu}
-              className="p-2 w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 focus:outline-none"
-              aria-label="Toggle Menu"
-            >
-              <motion.div className="relative w-5 h-5">
-                <span
-                  className={`absolute h-0.5 w-5 bg-gray-800 dark:bg-gray-200 transition-all duration-300 ${
-                    isMenuOpen ? "top-2 rotate-45" : "top-0"
-                  }`}
-                ></span>
-                <span
-                  className={`absolute h-0.5 w-5 bg-gray-800 dark:bg-gray-200 transition-all duration-300 ${
-                    isMenuOpen ? "opacity-0" : "top-2"
-                  }`}
-                ></span>
-                <span
-                  className={`absolute h-0.5 w-5 bg-gray-800 dark:bg-gray-200 transition-all duration-300 ${
-                    isMenuOpen ? "top-2 -rotate-45" : "top-4"
-                  }`}
-                ></span>
-              </motion.div>
-            </button>
+        {/* Desktop Search Bar */}
+        <div className="hidden md:flex flex-1 justify-center px-4">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            />
+            <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
           </div>
         </div>
 
-        {/* === Mobile Search Dropdown === */}
-        <AnimatePresence>
-          {isSearchOpen && (
-            <motion.div
-              key="mobile-search"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden overflow-hidden pb-3"
-            >
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="block w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-gray-50 
-                    text-gray-900 focus:ring-blue-500 focus:border-blue-500
-                    dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 
-                    dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        {/* Desktop Nav + Auth */}
+        <div className="hidden md:flex items-center space-x-6">
+          <nav className="flex space-x-6 text-gray-700 dark:text-gray-300">
+            <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">
+              Home
+            </Link>
+            <Link href="/services" className="hover:text-blue-600 dark:hover:text-blue-400">
+              Services
+            </Link>
+            <Link href="/about" className="hover:text-blue-600 dark:hover:text-blue-400">
+              About
+            </Link>
+          </nav>
 
-      {/* === Mobile Nav Menu === */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-white dark:bg-gray-900 shadow-inner border-t border-gray-200 dark:border-gray-700"
-          >
-            <div className="p-4 space-y-4">
-              {/* Mobile Nav Links */}
-              <ul className="flex flex-col space-y-3 text-base font-medium">
-                {[
-                  { name: "Home", path: "/" },
-                  { name: "About", path: "/about" },
-                  { name: "Services", path: "/services" },
-                ].map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      href={item.path}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`block px-3 py-2 rounded transition-colors duration-300 ${
-                        isActive(item.path)
-                          ? "bg-blue-700 text-white dark:bg-blue-600"
-                          : "text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Mobile Sign In Button */}
-              <button className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 
-                focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 
-                dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          {isLoaded && isSignedIn ? (
+            <UserButton appearance={{ theme: dark }} />
+          ) : (
+            <Link href="/sign-in">
+              <button className="px-4 py-2 text-sm font-medium bg-blue-700 text-white rounded-lg hover:bg-blue-800">
                 Sign In
               </button>
-            </div>
-          </motion.div>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Icons */}
+        <div className="flex md:hidden items-center space-x-4">
+          {/* Search Icon */}
+          <button
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
+          {/* Hamburger Menu */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Search Bar */}
+      {showMobileSearch && (
+        <div className="px-4 pb-3 md:hidden">
+          <div className="relative w-full">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            />
+            <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              className="fixed inset-0 bg-black bg-opacity-40 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+            />
+
+            {/* Sidebar */}
+            <motion.div
+              className="fixed top-0 left-0 w-72 h-full bg-white dark:bg-gray-900 shadow-lg z-50 flex flex-col"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {/* Header with Close Button */}
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
+                <Link href="/" className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="text-blue-600">Khali</span>Blog
+                </Link>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex flex-col flex-1 p-6 space-y-5 text-lg text-gray-700 dark:text-gray-300">
+                <Link
+                  href="/"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/services"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                <Link
+                  href="/about"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  About
+                </Link>
+              </nav>
+
+              {/* User Section at Bottom */}
+              <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                {isLoaded ? (
+                  isSignedIn ? (
+                    <div className="flex items-center justify-between">
+                      <UserButton
+                        appearance={{ theme: dark }}
+                        afterSignOutUrl="/"
+                      />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Account
+                      </p>
+                    </div>
+                  ) : (
+                    <Link href="/sign-in" className="block w-full">
+                      <button className="w-full px-4 py-2 text-sm font-medium bg-blue-700 text-white rounded-lg hover:bg-blue-800">
+                        Sign In
+                      </button>
+                    </Link>
+                  )
+                ) : (
+                  <p className="text-gray-500 text-sm">Loading...</p>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </div>
+    </header>
   );
 };
 
