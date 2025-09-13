@@ -1,26 +1,52 @@
-import { verifyWebhook } from '@clerk/nextjs/webhooks'
-import { NextRequest } from 'next/server'
+import { headers } from "next/headers";
+import { Webhook } from "svix";
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
-    try {
-        const evt = await verifyWebhook(req);
+  console.log("📥 Webhook received");
 
-        // Do something with payload
-        // For this guide, log payload to console
-        const { id } = evt.data;
-        const eventType = evt.type;
-        console.log(`Received webhook with ID ${id} and event type of ${eventType}`);
-        console.log('Webhook payload:', evt.data);
-        if (evt.type === 'user.created') {
-            console.log('userId:', evt.data.id)
-        } if (evt.type === 'user.updated') {
-            console.log('user is updated:', evt.data.id)
-        } if (evt.type === 'user.deleted') {
-            console.log('user is delected:', evt.data.id)
-        }
-        return new Response('Webhook received', { status: 200 });
-    } catch (err) {
-        console.error('Error verifying webhook:', err);
-        return new Response('Error verifying webhook', { status: 400 });
+  try {
+    const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+    if (!WEBHOOK_SECRET) {
+      console.error("❌ Missing CLERK_WEBHOOK_SECRET");
+      return new NextResponse("Missing Clerk Webhook Secret", { status: 500 });
     }
+
+    const payload = await req.text();
+    console.log("Payload received:", payload);
+
+    const headerPayload = headers();
+    const svixId = headerPayload.get("svix-id");
+    const svixTimestamp = headerPayload.get("svix-timestamp");
+    const svixSignature = headerPayload.get("svix-signature");
+
+    console.log("Headers:", { svixId, svixTimestamp, svixSignature });
+
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      console.error("❌ Missing one of the Svix headers");
+      return new NextResponse("Missing Svix headers", { status: 400 });
+    }
+
+    const wh = new Webhook(WEBHOOK_SECRET);
+
+    let evt;
+    try {
+      evt = wh.verify(payload, {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature,
+      });
+      console.log("✅ Signature verified:", evt.type);
+    } catch (err) {
+      console.error("❌ Signature verification failed:", err);
+      return new NextResponse("Invalid signature", { status: 400 });
+    }
+
+    console.log("Event type:", evt.type);
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("❌ Unexpected error:", err);
+    return new NextResponse("Server error", { status: 500 });
+  }
 }
