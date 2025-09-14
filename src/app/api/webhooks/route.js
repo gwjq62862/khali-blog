@@ -1,7 +1,12 @@
 import { createOrUpdateUser, deleteUser } from "@/app/lib/actions/user";
-import { clerkClient } from "@clerk/nextjs/server";
+
 
 import { Webhook } from "svix";
+import { createClerkClient } from '@clerk/nextjs/server'
+
+const clerkClient = createClerkClient({ 
+  secretKey: process.env.CLERK_SECRET_KEY 
+})
 
 // Clerk webhook handler
 export async function POST(req) {
