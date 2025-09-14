@@ -6,7 +6,7 @@ export const createOrUpdateUser = async (
     id,
     first_name,
     last_name,
-    email_address,
+    email_addresses,
     image_url,
     username
 ) => {
@@ -18,7 +18,7 @@ export const createOrUpdateUser = async (
                 $set: {
                     firstName: first_name,
                     lastName: last_name,
-                    email: email_address[0].email_address,
+                    email: email_addresses[0].email_address,
                     profilePicture: image_url,
                     username: username,
                 }
