@@ -1,4 +1,4 @@
-import { createOrUpdateUser, delteUser } from "@/app/lib/actions/user";
+import { createOrUpdateUser, deleteUser } from "@/app/lib/actions/user";
 import { clerkClient } from "@clerk/nextjs/server";
 import { Webhook } from "svix";
 
@@ -35,7 +35,7 @@ export async function POST(req) {
         id,
         first_name,
         last_name,
-        email_addresses,
+        email_addresses, // should match parameter name in action
         image_url,
         username
       );
