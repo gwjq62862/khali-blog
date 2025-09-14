@@ -1,48 +1,104 @@
 import { Webhook } from "svix";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
 
+// Clerk webhook handler
 export async function POST(req) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
 
-  // If missing secret
   if (!WEBHOOK_SECRET) {
-    console.error("❌ Missing CLERK_WEBHOOK_SIGNING_SECRET");
-    return new NextResponse("Missing Clerk Webhook Signing Secret", { status: 500 });
+    console.error("❌ Missing Clerk Webhook Secret!");
+    return new Response("Missing CLERK_WEBHOOK_SIGNING_SECRET", { status: 400 });
   }
 
-  const payload = await req.text(); // IMPORTANT: req.text(), NOT req.json()
-  const headerPayload = headers();
+  // Get the raw body and headers
+  const body = await req.text();
+  const headers = Object.fromEntries(req.headers.entries());
 
-  const svixId = headerPayload.get("svix-id");
-  const svixTimestamp = headerPayload.get("svix-timestamp");
-  const svixSignature = headerPayload.get("svix-signature");
+  console.log("Incoming Headers:", headers);
+  console.log("Raw Body:", body);
 
-  if (!svixId || !svixTimestamp || !svixSignature) {
-    console.error("❌ Missing Svix headers:", { svixId, svixTimestamp, svixSignature });
-    return new NextResponse("Missing Svix headers", { status: 400 });
-  }
-
-  const wh = new Webhook(WEBHOOK_SECRET);
-
-  let evt;
   try {
-    // Verify the request
-    evt = wh.verify(payload, {
-      "svix-id": svixId,
-      "svix-timestamp": svixTimestamp,
-      "svix-signature": svixSignature,
+    // Verify Clerk's signature using svix
+    const wh = new Webhook(WEBHOOK_SECRET);
+
+    const event = wh.verify(body, {
+      "svix-id": headers["svix-id"],
+      "svix-timestamp": headers["svix-timestamp"],
+      "svix-signature": headers["svix-signature"],
     });
-    console.log("✅ Webhook verified:", evt.type);
-  } catch (err) {
-    console.error("❌ Error verifying webhook:", err);
-    return new NextResponse("Error verifying webhook", { status: 400 });
-  }
 
-  // Example: handle events
-  if (evt.type === "user.created") {
-    console.log("New user created:", evt.data.id);
-  }
+    console.log("✅ Webhook Verified:", event.type);
 
-  return NextResponse.json({ success: true });
+    // Handle different webhook event types
+    switch (event.type) {
+      case "user.created":
+        await handleUserCreated(event.data);
+        break;
+
+      case "user.updated":
+        await handleUserUpdated(event.data);
+        break;
+
+      case "user.deleted":
+        await handleUserDeleted(event.data);
+        break;
+
+      default:
+        console.warn("⚠️ Unhandled event type:", event.type);
+    }
+
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    console.error("❌ Error verifying webhook:", error.message);
+    return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+  }
+}
+
+//
+// --- Event Handlers ---
+//
+
+/**
+ * When a new user signs up
+ */
+async function handleUserCreated(data) {
+  console.log("👤 User Created:", data);
+
+  // Example: save user to database
+  // await db.user.create({
+  //   id: data.id,
+  //   email: data.email_addresses[0].email_address,
+  //   name: `${data.first_name} ${data.last_name}`,
+  // });
+
+  console.log(`New user saved: ${data.id}`);
+}
+
+/**
+ * When a user updates their profile
+ */
+async function handleUserUpdated(data) {
+  console.log("🔄 User Updated:", data);
+
+  // Example: update user in database
+  // await db.user.update({
+  //   where: { id: data.id },
+  //   data: {
+  //     email: data.email_addresses[0].email_address,
+  //     name: `${data.first_name} ${data.last_name}`,
+  //   },
+  // });
+
+  console.log(`User updated: ${data.id}`);
+}
+
+/**
+ * When a user deletes their account
+ */
+async function handleUserDeleted(data) {
+  console.log("🗑️ User Deleted:", data);
+
+  // Example: remove user from database
+  // await db.user.delete({ where: { id: data.id } });
+
+  console.log(`User deleted: ${data.id}`);
 }
