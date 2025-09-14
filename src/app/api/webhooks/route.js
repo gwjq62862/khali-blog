@@ -29,7 +29,7 @@ export async function POST(req) {
 
     const { id, first_name, last_name, email_addresses, image_url, username } = event.data;
 
-    // Handle create or update
+  
     if (event.type === "user.created" || event.type === "user.updated") {
       const user = await createOrUpdateUser(
         id,
@@ -42,7 +42,7 @@ export async function POST(req) {
 
       if (user && event.type === "user.created") {
         try {
-          await clerkClient.users.updateUserMetadata(id, {
+          await clerkClient.user.updateUserMetadata(id, {
             publicMetadata: {
               userMongoId: user._id,
               isAdmin: user.isAdmin
@@ -57,10 +57,10 @@ export async function POST(req) {
       console.log("User created/updated in MongoDB:", user);
     }
 
-    // Handle delete
+    
     if (event.type === "user.deleted") {
       try {
-        await delteUser(event.data.id);
+        await deleteUser(event.data.id);
         console.log(`🗑️ User with Clerk ID ${event.data.id} deleted from MongoDB`);
       } catch (error) {
         console.error("❌ Error deleting user:", error);
