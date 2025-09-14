@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-let innitalize=true;
+let innitalize=false;
 
 export default async function connectDb() {
     if(innitalize){
