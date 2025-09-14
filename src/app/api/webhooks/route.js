@@ -1,4 +1,4 @@
-import { createOrUpdateUser, deleteUser } from "@/app/lib/actions/user";
+import { createOrUpdateUser, delteUser } from "@/app/lib/actions/user";
 import { clerkClient } from "@clerk/nextjs/server";
 import { Webhook } from "svix";
 
@@ -60,7 +60,7 @@ export async function POST(req) {
     // Handle delete
     if (event.type === "user.deleted") {
       try {
-        await deleteUser(id);
+        await delteUser(id);
         console.log(`🗑️ User with Clerk ID ${id} deleted from MongoDB`);
       } catch (error) {
         console.error("❌ Error deleting user:", error);
