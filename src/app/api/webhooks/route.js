@@ -42,7 +42,7 @@ export async function POST(req) {
 
       if (user && event.type === "user.created") {
         try {
-          await clerkClient.users.updateMetadata(id, {
+          await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
               userMongoId: user._id,
               isAdmin: user.isAdmin
@@ -60,8 +60,8 @@ export async function POST(req) {
     // Handle delete
     if (event.type === "user.deleted") {
       try {
-        await delteUser(id);
-        console.log(`🗑️ User with Clerk ID ${id} deleted from MongoDB`);
+        await delteUser(event.data.id);
+        console.log(`🗑️ User with Clerk ID ${event.data.id} deleted from MongoDB`);
       } catch (error) {
         console.error("❌ Error deleting user:", error);
         return new Response(JSON.stringify({ error: "Failed to delete user" }), { status: 400 });

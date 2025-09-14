@@ -8,11 +8,7 @@ export default async function connectDb() {
         return
     }
     try {
-        await mongoose.connect(process.env.MONGODB_URI,{
-            dbName:"khali-blog",
-            useNewUrlParser:true,
-            useUnifiedTopology:true,
-    } )
+        await mongoose.connect(process.env.MONGODB_URI)
     console.log('your monodb is successfully connected')
     innitalize=true;
 }
