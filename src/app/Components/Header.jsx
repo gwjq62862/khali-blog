@@ -1,10 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Search, Menu, X } from "lucide-react";
-import {
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { dark } from "@clerk/themes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,11 +9,15 @@ import { motion, AnimatePresence } from "framer-motion";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  // Get isAdmin directly from Clerk's publicMetadata
+  const isAdmin = user?.publicMetadata?.isAdmin === true;
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
+        
         {/* Logo */}
         <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
           <span className="text-blue-600">Khali</span>Blog
@@ -34,18 +35,19 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Desktop Nav + Auth */}
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
           <nav className="flex space-x-6 text-gray-700 dark:text-gray-300">
-            <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">
-              Home
-            </Link>
-            <Link href="/services" className="hover:text-blue-600 dark:hover:text-blue-400">
-              Services
-            </Link>
-            <Link href="/about" className="hover:text-blue-600 dark:hover:text-blue-400">
-              About
-            </Link>
+            <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Home</Link>
+            <Link href="/services" className="hover:text-blue-600 dark:hover:text-blue-400">Services</Link>
+            <Link href="/about" className="hover:text-blue-600 dark:hover:text-blue-400">About</Link>
+
+            {/* Dashboard for admins only */}
+            {isAdmin && (
+              <Link href="/dashboard" className="hover:text-blue-600 dark:hover:text-blue-400">
+                Dashboard
+              </Link>
+            )}
           </nav>
 
           {isLoaded && isSignedIn ? (
@@ -61,7 +63,6 @@ const Header = () => {
 
         {/* Mobile Icons */}
         <div className="flex md:hidden items-center space-x-4">
-          {/* Search Icon */}
           <button
             onClick={() => setShowMobileSearch(!showMobileSearch)}
             className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -69,7 +70,6 @@ const Header = () => {
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Hamburger Menu */}
           <button
             onClick={() => setIsMenuOpen(true)}
             className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -114,7 +114,7 @@ const Header = () => {
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {/* Header with Close Button */}
+              {/* Sidebar Header */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
                 <Link href="/" className="text-lg font-bold text-gray-900 dark:text-white">
                   <span className="text-blue-600">Khali</span>Blog
@@ -127,55 +127,25 @@ const Header = () => {
                 </button>
               </div>
 
-              {/* Navigation Links */}
+              {/* Sidebar Nav Links */}
               <nav className="flex flex-col flex-1 p-6 space-y-5 text-lg text-gray-700 dark:text-gray-300">
-                <Link
-                  href="/"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 font-medium">
                   Home
                 </Link>
-                <Link
-                  href="/services"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/services" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 font-medium">
                   Services
                 </Link>
-                <Link
-                  href="/about"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/about" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 font-medium">
                   About
                 </Link>
-              </nav>
 
-              {/* User Section at Bottom */}
-              <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                {isLoaded ? (
-                  isSignedIn ? (
-                    <div className="flex items-center justify-between">
-                      <UserButton
-                        appearance={{ theme: dark }}
-                        afterSignOutUrl="/"
-                      />
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Account
-                      </p>
-                    </div>
-                  ) : (
-                    <Link href="/sign-in" className="block w-full">
-                      <button className="w-full px-4 py-2 text-sm font-medium bg-blue-700 text-white rounded-lg hover:bg-blue-800">
-                        Sign In
-                      </button>
-                    </Link>
-                  )
-                ) : (
-                  <p className="text-gray-500 text-sm">Loading...</p>
+                {/* Admin-only Dashboard */}
+                {isAdmin && (
+                  <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 font-medium">
+                    Dashboard
+                  </Link>
                 )}
-              </div>
+              </nav>
             </motion.div>
           </>
         )}
